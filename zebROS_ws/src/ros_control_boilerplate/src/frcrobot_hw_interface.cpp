@@ -136,17 +136,8 @@ namespace frcrobot_control
 // in the low level control code. So far this is only used for sending data
 // to the driver station and back via network tables.
 
-const int pidIdx = 0; //0 for primary closed-loop, 1 for cascaded closed-loop
-const int timeoutMs = 0; //If nonzero, function will wait for config success and report an error if it times out. If zero, no blocking or checking is performed
-
-// Constructor. Pass appropriate params to base class constructor,
-// initialze robot_ pointer to NULL
-FRCRobotHWInterface::FRCRobotHWInterface(ros::NodeHandle &nh, urdf::Model *urdf_model)
-	: ros_control_boilerplate::FRCRobotInterface(nh, urdf_model)
-	, robot_(nullptr)
-	, read_tracer_(nh_.getNamespace() + "::read()")
-{
-}
+constexpr int pidIdx = 0; //0 for primary closed-loop, 1 for cascaded closed-loop
+constexpr int timeoutMs = 0; //If nonzero, function will wait for config success and report an error if it times out. If zero, no blocking or checking is performed
 
 // Clean up whatever we've created in init()
 FRCRobotHWInterface::~FRCRobotHWInterface()
@@ -184,12 +175,13 @@ std::vector<ros_control_boilerplate::DummyJoint> FRCRobotHWInterface::getDummyJo
 	return dummy_joints;
 }
 
-void FRCRobotHWInterface::init(void)
+void FRCRobotHWInterface::init(ros::NodeHandle &nh, urdf::Model *urdf_model)
 {
 	// Do base class init. This loads common interface info
 	// used by both the real and sim interfaces
-	FRCRobotInterface::init();
+	FRCRobotInterface::init(nh, urdf_model);
 
+	read_tracer_ = std::make_unique<Tracer>(nh_.getNamespace() + "::read()");
 	if (run_hal_robot_)
 	{
 		// Make sure to initialize WPIlib code before creating
@@ -199,6 +191,7 @@ void FRCRobotHWInterface::init(void)
 	}
 	else
 	{
+		robot_ = nullptr;
 		// This is for non Rio-based robots.  Call init for the wpilib HAL code
 		// we've "borrowed" before using them
 		hal::init::InitializeCANAPI();
@@ -962,7 +955,7 @@ void FRCRobotHWInterface::pcm_read_thread(HAL_CompressorHandle compressor_handle
 
 void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 {
-	read_tracer_.start_unique("Check for ready");
+	read_tracer_->start_unique("Check for ready");
 	if (run_hal_robot_ && !robot_code_ready_)
 	{
 		// This will be written by the last controller to be
@@ -980,10 +973,10 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 
 	if (robot_code_ready_)
 	{
-		read_tracer_.start_unique("OneIteration");
+		read_tracer_->start_unique("OneIteration");
 		robot_->OneIteration();
 
-		read_tracer_.start_unique("joysticks");
+		read_tracer_->start_unique("joysticks");
 		// Update joystick state as often as possible
 		auto time_now_t = ros::Time::now();
 		for (size_t i = 0; i < num_joysticks_; i++)
@@ -1071,7 +1064,7 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 			}
 		}
 
-		read_tracer_.start_unique("match data");
+		read_tracer_->start_unique("match data");
 		int32_t status = 0;
 		match_data_.setMatchTimeRemaining(HAL_GetMatchTime(&status));
 		HAL_MatchInfo info;
@@ -1136,7 +1129,7 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 		status = 0;
 		match_data_.setBatteryVoltage(HAL_GetVinVoltage(&status));
 
-		read_tracer_.start_unique("robot controller data");
+		read_tracer_->start_unique("robot controller data");
 		status = 0;
 		robot_controller_state_.SetFPGAVersion(HAL_GetFPGAVersion(&status));
 		robot_controller_state_.SetFPGARevision(HAL_GetFPGARevision(&status));
@@ -1174,7 +1167,7 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 		robot_controller_state_.SetCANTransmitErrorCount(transmit_error_count);
 	}
 
-	read_tracer_.start_unique("can talons");
+	read_tracer_->start_unique("can talons");
 	for (std::size_t joint_id = 0; joint_id < num_can_ctre_mcs_; ++joint_id)
 	{
 		if (can_ctre_mc_local_hardwares_[joint_id])
@@ -1221,13 +1214,13 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 		}
 	}
 
-	read_tracer_.start_unique("nidec");
+	read_tracer_->start_unique("nidec");
 	for (size_t i = 0; i < num_nidec_brushlesses_; i++)
 	{
 		if (nidec_brushless_local_updates_[i])
 			brushless_vel_[i] = nidec_brushlesses_[i]->Get();
 	}
-	read_tracer_.start_unique("digital in");
+	read_tracer_->start_unique("digital in");
 	for (size_t i = 0; i < num_digital_inputs_; i++)
 	{
 		//State should really be a bool - but we're stuck using
@@ -1259,13 +1252,13 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 			double_solenoid_state_[i] = double_solenoid_command_[i];
 	}
 #endif
-	read_tracer_.start_unique("analog in");
+	read_tracer_->start_unique("analog in");
 	for (size_t i = 0; i < num_analog_inputs_; i++)
 	{
 		if (analog_input_locals_[i])
 			analog_input_state_[i] = analog_inputs_[i]->GetValue() *analog_input_a_[i] + analog_input_b_[i];
 	}
-	read_tracer_.start_unique("navX");
+	read_tracer_->start_unique("navX");
 	//navX read here
 	for (size_t i = 0; i < num_navX_; i++)
 	{
@@ -1320,7 +1313,7 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 		}
 	}
 
-	read_tracer_.start_unique("compressors");
+	read_tracer_->start_unique("compressors");
 	for (size_t i = 0; i < num_compressors_; i++)
 	{
 		if (compressor_local_updates_[i])
@@ -1330,7 +1323,7 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 		}
 	}
 
-	read_tracer_.start_unique("pdps");
+	read_tracer_->start_unique("pdps");
 	for (size_t i = 0; i < num_pdps_; i++)
 	{
 		if (pdp_locals_[i])
@@ -1339,8 +1332,8 @@ void FRCRobotHWInterface::read(ros::Duration &/*elapsed_time*/)
 			pdp_state_[i] = *pdp_read_thread_state_[i];
 		}
 	}
-	read_tracer_.stop();
-	ROS_INFO_STREAM_THROTTLE(60, read_tracer_.report());
+	read_tracer_->stop();
+	ROS_INFO_STREAM_THROTTLE(60, read_tracer_->report());
 }
 
 double FRCRobotHWInterface::getConversionFactor(int encoder_ticks_per_rotation,

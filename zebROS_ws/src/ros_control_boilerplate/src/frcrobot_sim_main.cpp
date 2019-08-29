@@ -53,9 +53,9 @@ int main(int argc, char **argv)
 	ROS_WARN("Main2");	
 	// Create the hardware interface specific to your robot
 	boost::shared_ptr<frcrobot_control::FRCRobotSimInterface> frcrobot_sim_interface
-	(new frcrobot_control::FRCRobotSimInterface(nh));
+	(new frcrobot_control::FRCRobotSimInterface());
 	ROS_WARN("Main3");	
-	frcrobot_sim_interface->init();
+	frcrobot_sim_interface->init(nh);
 	ROS_WARN("Main4");	
 
 	// Start the control loop

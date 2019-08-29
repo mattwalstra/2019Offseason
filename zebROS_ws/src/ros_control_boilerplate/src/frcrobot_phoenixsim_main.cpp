@@ -51,8 +51,8 @@ int main(int argc, char **argv)
 
 	// Create the hardware interface specific to your robot
 	boost::shared_ptr<frcrobot_control::FRCRobotPhoenixSimInterface> frcrobot_phoenixsim_interface
-		(new frcrobot_control::FRCRobotPhoenixSimInterface(nh));
-	frcrobot_phoenixsim_interface->init();
+		(new frcrobot_control::FRCRobotPhoenixSimInterface());
+	frcrobot_phoenixsim_interface->init(nh);
 
 	// Start the control loop
 	ros_control_boilerplate::GenericHWControlLoop control_loop(nh, frcrobot_phoenixsim_interface);

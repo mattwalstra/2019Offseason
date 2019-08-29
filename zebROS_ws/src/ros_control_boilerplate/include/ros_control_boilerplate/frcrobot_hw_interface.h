@@ -184,18 +184,17 @@ class DoubleSolenoidHandle
 };
 
 /// \brief Hardware interface for a robot
-class FRCRobotHWInterface : public ros_control_boilerplate::FRCRobotInterface
+class FRCRobotHWInterface : public virtual ros_control_boilerplate::FRCRobotInterface
 {
 	public:
 		/**
 		 * \brief Constructor
-		 * \param nh - Node handle for topics.
 		 */
-		FRCRobotHWInterface(ros::NodeHandle &nh, urdf::Model *urdf_model = NULL);
+		FRCRobotHWInterface(void) { }
 		~FRCRobotHWInterface();
 
 		/** \brief Initialize the hardware interface */
-		virtual void init(void) override;
+		virtual void init(ros::NodeHandle &nh, urdf::Model *urdf_model = NULL) override;
 
 		/** \brief Read the state from the robot hardware. */
 		virtual void read(ros::Duration &elapsed_time) override;
@@ -290,7 +289,7 @@ class FRCRobotHWInterface : public ros_control_boilerplate::FRCRobotInterface
 		std::vector<Tracer> ctre_mc_thread_tracers_;
 		std::vector<Tracer> pdp_thread_tracers_;
 		std::vector<Tracer> pcm_thread_tracers_;
-		Tracer read_tracer_;
+		std::unique_ptr<Tracer> read_tracer_;
 
 };  // class
 

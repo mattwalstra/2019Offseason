@@ -4,30 +4,26 @@ project(ros_control_boilerplate)
 include ("../cmake_modules/CMakeOpt.cmake")
 
 find_package(catkin REQUIRED COMPONENTS
-  cmake_modules
   realtime_tools
   hardware_interface
   controller_manager
   roscpp
   control_msgs
   trajectory_msgs
-  actionlib
   urdf
   std_msgs
-  sensor_msgs
   rosparam_shortcuts
   talon_interface
   message_generation
   frc_msgs
   frc_interfaces
+  gazebo_dev
+  pluginlib
 )
 
-add_message_files (
-  FILES
-  AutoMode.msg
-  AutoModeStatus.msg
-)
-
+#add_message_files (
+#  FILES
+#)
 
 add_service_files (
   FILES
@@ -41,7 +37,12 @@ generate_messages(
   ros_control_boilerplate
 )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+#find_package(Gflags REQUIRED)
+#find_package(Eigen3 REQUIRED)
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
 
 catkin_package(
   INCLUDE_DIRS
@@ -51,7 +52,6 @@ catkin_package(
 	controller_manager
 	control_msgs
 	trajectory_msgs
-	actionlib
 	urdf
 	std_msgs
 	frc_msgs
@@ -91,6 +91,16 @@ target_link_libraries(frcrobot_sim_main
 	frc_robot_interface
 )
 
+add_library(frcrobot_gazebosim
+	src/frcrobot_gazebosim_interface.cpp
+	src/frcrobot_sim_interface.cpp
+	src/frc_robot_interface.cpp
+)
+
+target_link_libraries(frcrobot_gazebosim
+	${catkin_LIBRARIES}
+)
+
 # Forces messages to be generated before
 # the target which uses them
 add_dependencies(frcrobot_sim_main
@@ -102,6 +112,7 @@ add_dependencies(frcrobot_sim_main
 # want to run sim on the RoboRIO
 install(TARGETS
   frcrobot_sim_main
+  frcrobot_gazebosim
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -376,7 +387,7 @@ add_dependencies(q_to_rpy
 
 # Install executables
 install(TARGETS
-  frcrobot_hw_main
+  frcrobot_hw_main q_to_rpy
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -448,4 +459,8 @@ install(DIRECTORY
 	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 	PATTERN *~ EXCLUDE
 	PATTERN *.sw? EXCLUDE
+)
+
+install(FILES frcrobot_gazebosim_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

@@ -37,7 +37,7 @@
 */
 
 
-//PURPOSE: Pulls togther stuff needed to run hw interface 
+//PURPOSE: Pulls togther stuff needed to run hw interface
 
 #include <ros_control_boilerplate/generic_hw_control_loop.h>
 #include <ros_control_boilerplate/frcrobot_hw_interface.h>
@@ -54,13 +54,13 @@ int main(int argc, char **argv)
 
 	// Create the hardware interface specific to your robot
 	boost::shared_ptr<frcrobot_control::FRCRobotHWInterface> frcrobot_hw_interface
-	(new frcrobot_control::FRCRobotHWInterface(nh));
-	frcrobot_hw_interface->init();
+	(new frcrobot_control::FRCRobotHWInterface());
+	frcrobot_hw_interface->init(nh);
 
 	// Start the control loop
 	ros_control_boilerplate::GenericHWControlLoop control_loop(nh, frcrobot_hw_interface);
 
-	control_loop.run(); // Blocks until shutdown signal recieved 
+	control_loop.run(); // Blocks until shutdown signal recieved
 
 	return 0;
 }
