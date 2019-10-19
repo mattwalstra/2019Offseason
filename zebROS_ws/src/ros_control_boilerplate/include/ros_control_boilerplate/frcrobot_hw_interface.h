@@ -203,9 +203,6 @@ class FRCRobotHWInterface : public ros_control_boilerplate::FRCRobotInterface
 		/** \brief Write the command to the robot hardware. */
 		virtual void write(ros::Duration &elapsed_time) override;
 
-	protected:
-		virtual std::vector<ros_control_boilerplate::DummyJoint> getDummyJoints(void) override;
-
 	private:
 		void process_motion_profile_buffer_thread(double hz);
 
@@ -247,8 +244,6 @@ class FRCRobotHWInterface : public ros_control_boilerplate::FRCRobotInterface
 
 		bool safeTalonCall(ctre::phoenix::ErrorCode error_code,
 				const std::string &talon_method_name);
-
-		double navX_zero_;
 
 		//certain data will be read at a slower rate than the main loop, for computational efficiency
 		//robot iteration calls - sending stuff to driver station
