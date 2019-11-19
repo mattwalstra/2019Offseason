@@ -12,7 +12,6 @@ if (DEFINED CMAKE_TOOLCHAIN_FILE)
     message_filters
     message_generation
     geometry_msgs
-	image_geometry
 	nodelet
     std_msgs
     sensor_msgs
