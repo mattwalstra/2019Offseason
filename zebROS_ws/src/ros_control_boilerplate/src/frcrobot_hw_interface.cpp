@@ -2827,16 +2827,18 @@ void FRCRobotHWInterface::write(ros::Duration &elapsed_time)
 
 				double pid_output_min;
 				double pid_output_max;
-				if (smc.changedPIDOutputRange(slot, pid_output_min, pid_output_max) &&
-					safeSparkMaxCall(pid_controller->SetOutputRange(pid_output_min, pid_output_max, slot), "SetOutputRange"))
+				if (smc.changedPIDOutputRange(slot, pid_output_min, pid_output_max))
 				{
-					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " PIDF slot " << slot << " output range");
-					sms.setPIDFOutputMin(slot, pid_output_min);
-					sms.setPIDFOutputMax(slot, pid_output_max);
-				}
-				else
-				{
-					smc.resetPIDOutputRange(slot);
+					if (safeSparkMaxCall(pid_controller->SetOutputRange(pid_output_min, pid_output_max, slot), "SetOutputRange"))
+					{
+						ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " PIDF slot " << slot << " output range");
+						sms.setPIDFOutputMin(slot, pid_output_min);
+						sms.setPIDFOutputMax(slot, pid_output_max);
+					}
+					else
+					{
+						smc.resetPIDOutputRange(slot);
+					}
 				}
 
 				double                            pidf_reference_value;
@@ -2848,110 +2850,124 @@ void FRCRobotHWInterface::write(ros::Duration &elapsed_time)
 				rev::CANPIDController::ArbFFUnits rev_arb_feed_forward_units;
 
 				const bool reference_changed = smc.changedPIDFReference(slot, pidf_reference_value, pidf_reference_ctrl, pidf_arb_feed_forward, pidf_arb_feed_forward_units);
-				if ((slot_changed || reference_changed) &&
-					convertRevControlType(pidf_reference_ctrl, rev_reference_ctrl) &&
-					convertRevArbFFUnits(pidf_arb_feed_forward_units, rev_arb_feed_forward_units) &&
-					safeSparkMaxCall(pid_controller->SetReference(pidf_reference_value, rev_reference_ctrl, slot, pidf_arb_feed_forward, rev_arb_feed_forward_units), "SetReference"))
+				if ((slot_changed || reference_changed))
 				{
-					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " PIDF slot " << slot << " refrence");
+					if (convertRevControlType(pidf_reference_ctrl, rev_reference_ctrl) &&
+						convertRevArbFFUnits(pidf_arb_feed_forward_units, rev_arb_feed_forward_units) &&
+						safeSparkMaxCall(pid_controller->SetReference(pidf_reference_value, rev_reference_ctrl, slot, pidf_arb_feed_forward, rev_arb_feed_forward_units), "SetReference"))
+					{
+						ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " PIDF slot " << slot << " refrence");
 
-					sms.setPIDFReferenceOutput(slot, pidf_reference_value);
-					sms.setPIDFReferenceCtrl(slot, pidf_reference_ctrl);
-					sms.setPIDFArbFeedForward(slot, pidf_arb_feed_forward);
-					sms.setPIDFArbFeedForwardUnits(slot, pidf_arb_feed_forward_units);
-					sms.setPIDFReferenceSlot(slot);
-				}
-				else
-				{
-					smc.resetPIDReference(slot);
-					smc.resetPIDFReferenceSlot();
+						sms.setPIDFReferenceOutput(slot, pidf_reference_value);
+						sms.setPIDFReferenceCtrl(slot, pidf_reference_ctrl);
+						sms.setPIDFArbFeedForward(slot, pidf_arb_feed_forward);
+						sms.setPIDFArbFeedForwardUnits(slot, pidf_arb_feed_forward_units);
+						sms.setPIDFReferenceSlot(slot);
+					}
+					else
+					{
+						smc.resetPIDReference(slot);
+						smc.resetPIDFReferenceSlot();
+					}
 				}
 			}
 
 			bool limit_switch_enabled;
 			hardware_interface::LimitSwitchPolarity limit_switch_polarity;
 			rev::CANDigitalInput::LimitSwitchPolarity rev_limit_switch_polarity;
-			if (smc.changedForwardLimitSwitch(limit_switch_polarity, limit_switch_enabled) &&
-				convertRevLimitSwitchPolarity(limit_switch_polarity, rev_limit_switch_polarity) &&
-				safeSparkMaxCall(spark_max->GetForwardLimitSwitch(rev_limit_switch_polarity).EnableLimitSwitch(limit_switch_enabled),
-					"GetForwardLimitSwitch"))
+			if (smc.changedForwardLimitSwitch(limit_switch_polarity, limit_switch_enabled))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " forward limit switch");
-				sms.setForwardLimitSwitchEnabled(limit_switch_enabled);
-				sms.setForwardLimitSwitchPolarity(limit_switch_polarity);
+				if (convertRevLimitSwitchPolarity(limit_switch_polarity, rev_limit_switch_polarity) &&
+					safeSparkMaxCall(spark_max->GetForwardLimitSwitch(rev_limit_switch_polarity).EnableLimitSwitch(limit_switch_enabled),
+						"GetForwardLimitSwitch"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " forward limit switch");
+					sms.setForwardLimitSwitchEnabled(limit_switch_enabled);
+					sms.setForwardLimitSwitchPolarity(limit_switch_polarity);
+				}
+				else
+				{
+					smc.resetForwardLimitSwitch();
+				}
 			}
-			else
+			if (smc.changedReverseLimitSwitch(limit_switch_polarity, limit_switch_enabled))
 			{
-				smc.resetForwardLimitSwitch();
-			}
-			if (smc.changedReverseLimitSwitch(limit_switch_polarity, limit_switch_enabled) &&
-				convertRevLimitSwitchPolarity(limit_switch_polarity, rev_limit_switch_polarity) &&
-				safeSparkMaxCall(spark_max->GetReverseLimitSwitch(rev_limit_switch_polarity).EnableLimitSwitch(limit_switch_enabled) ,
-					"GetReverseLimitSwitch"))
-			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " reverse limit switch");
-				sms.setReverseLimitSwitchEnabled(limit_switch_enabled);
-				sms.setReverseLimitSwitchPolarity(limit_switch_polarity);
-			}
-			else
-			{
-				smc.resetReverseLimitSwitch();
+				if (convertRevLimitSwitchPolarity(limit_switch_polarity, rev_limit_switch_polarity) &&
+					safeSparkMaxCall(spark_max->GetReverseLimitSwitch(rev_limit_switch_polarity).EnableLimitSwitch(limit_switch_enabled) ,
+						"GetReverseLimitSwitch"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " reverse limit switch");
+					sms.setReverseLimitSwitchEnabled(limit_switch_enabled);
+					sms.setReverseLimitSwitchPolarity(limit_switch_polarity);
+				}
+				else
+				{
+					smc.resetReverseLimitSwitch();
+				}
 			}
 
 			unsigned int current_limit;
-			if (smc.changedCurrentLimitOne(current_limit) &&
-				safeSparkMaxCall(spark_max->SetSmartCurrentLimit(current_limit), "SetSmartCurrentLimit(1)"))
+			if (smc.changedCurrentLimitOne(current_limit))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " current limit (1 arg)");
-				sms.setCurrentLimit(current_limit);
-			}
-			else
-			{
-				smc.resetCurrentLimitOne();
+				if (safeSparkMaxCall(spark_max->SetSmartCurrentLimit(current_limit), "SetSmartCurrentLimit(1)"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " current limit (1 arg)");
+					sms.setCurrentLimit(current_limit);
+				}
+				else
+				{
+					smc.resetCurrentLimitOne();
+				}
 			}
 
 			unsigned int current_limit_stall;
 			unsigned int current_limit_free;
 			unsigned int current_limit_rpm;
-			if (smc.changedCurrentLimit(current_limit_stall, current_limit_free, current_limit_rpm) &&
-				safeSparkMaxCall(spark_max->SetSmartCurrentLimit(current_limit_stall, current_limit_free, current_limit_rpm), "SetSmartCurrentLimit(3)"))
+			if (smc.changedCurrentLimit(current_limit_stall, current_limit_free, current_limit_rpm))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " current limit (3 arg)");
-				sms.setCurrentLimitStall(current_limit_stall);
-				sms.setCurrentLimitFree(current_limit_free);
-				sms.setCurrentLimitRPM(current_limit_rpm);
-			}
-			else
-			{
-				smc.resetCurrentLimit();
+				if (safeSparkMaxCall(spark_max->SetSmartCurrentLimit(current_limit_stall, current_limit_free, current_limit_rpm), "SetSmartCurrentLimit(3)"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " current limit (3 arg)");
+					sms.setCurrentLimitStall(current_limit_stall);
+					sms.setCurrentLimitFree(current_limit_free);
+					sms.setCurrentLimitRPM(current_limit_rpm);
+				}
+				else
+				{
+					smc.resetCurrentLimit();
+				}
 			}
 
 			double secondary_current_limit;
 			unsigned int secondary_current_limit_cycles;
-			if (smc.changedSecondaryCurrentLimits(secondary_current_limit, secondary_current_limit_cycles) &&
-				safeSparkMaxCall(spark_max->SetSecondaryCurrentLimit(secondary_current_limit, secondary_current_limit_cycles), "SetSecondaryCurrentLimit()"))
+			if (smc.changedSecondaryCurrentLimits(secondary_current_limit, secondary_current_limit_cycles))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " secondary current limit");
-				sms.setSecondaryCurrentLimit(secondary_current_limit);
-				sms.setSecondaryCurrentLimitCycles(secondary_current_limit_cycles);
-			}
-			else
-			{
-				smc.resetSecondaryCurrentLimits();
+				if (safeSparkMaxCall(spark_max->SetSecondaryCurrentLimit(secondary_current_limit, secondary_current_limit_cycles), "SetSecondaryCurrentLimit()"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " secondary current limit");
+					sms.setSecondaryCurrentLimit(secondary_current_limit);
+					sms.setSecondaryCurrentLimitCycles(secondary_current_limit_cycles);
+				}
+				else
+				{
+					smc.resetSecondaryCurrentLimits();
+				}
 			}
 
 			hardware_interface::IdleMode idle_mode;
 			rev::CANSparkMax::IdleMode   rev_idle_mode;
-			if (smc.changedIdleMode(idle_mode) &&
-				convertRevIdleMode(idle_mode, rev_idle_mode) &&
-				safeSparkMaxCall(spark_max->SetIdleMode(rev_idle_mode), "SetIdleMode"))
+			if (smc.changedIdleMode(idle_mode))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " idle mode");
-				sms.setIdleMode(idle_mode);
-			}
-			else
-			{
-				smc.resetIdleMode();
+				if (convertRevIdleMode(idle_mode, rev_idle_mode) &&
+						safeSparkMaxCall(spark_max->SetIdleMode(rev_idle_mode), "SetIdleMode"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " idle mode");
+					sms.setIdleMode(idle_mode);
+				}
+				else
+				{
+					smc.resetIdleMode();
+				}
 			}
 
 			bool   voltage_compensation_enable;
@@ -2979,75 +2995,85 @@ void FRCRobotHWInterface::write(ros::Duration &elapsed_time)
 			}
 
 			double open_loop_ramp_rate;
-			if (smc.changedOpenLoopRampRate(open_loop_ramp_rate) &&
-				safeSparkMaxCall(spark_max->SetOpenLoopRampRate(open_loop_ramp_rate), "SetOpenLoopRampRate"))
+			if (smc.changedOpenLoopRampRate(open_loop_ramp_rate))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " open loop ramp rate");
-				sms.setOpenLoopRampRate(open_loop_ramp_rate);
-			}
-			else
-			{
-				smc.resetOpenLoopRampRate();
+				if (safeSparkMaxCall(spark_max->SetOpenLoopRampRate(open_loop_ramp_rate), "SetOpenLoopRampRate"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " open loop ramp rate");
+					sms.setOpenLoopRampRate(open_loop_ramp_rate);
+				}
+				else
+				{
+					smc.resetOpenLoopRampRate();
+				}
 			}
 
 			double closed_loop_ramp_rate;
-			if (smc.changedClosedLoopRampRate(closed_loop_ramp_rate) &&
-				safeSparkMaxCall(spark_max->SetClosedLoopRampRate(closed_loop_ramp_rate), "SetClosedLoopRampRate"))
+			if (smc.changedClosedLoopRampRate(closed_loop_ramp_rate))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " closed loop ramp rate");
-				sms.setClosedLoopRampRate(closed_loop_ramp_rate);
-			}
-			else
-			{
-				smc.resetClosedLoopRampRate();
+				if (safeSparkMaxCall(spark_max->SetClosedLoopRampRate(closed_loop_ramp_rate), "SetClosedLoopRampRate"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " closed loop ramp rate");
+					sms.setClosedLoopRampRate(closed_loop_ramp_rate);
+				}
+				else
+				{
+					smc.resetClosedLoopRampRate();
+				}
 			}
 
 			hardware_interface::ExternalFollower follower_type;
 			rev::CANSparkMax::ExternalFollower   rev_follower_type;
 			int follower_id;
 			bool follower_invert;
-			if (smc.changedFollower(follower_type, follower_id, follower_invert) &&
-				convertRevExternalFollower(follower_type, rev_follower_type) &&
-				safeSparkMaxCall(spark_max->Follow(rev_follower_type, follower_id, follower_invert), "Follow"))
+			if (smc.changedFollower(follower_type, follower_id, follower_invert))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " follow");
-				sms.setFollowerType(follower_type);
-				sms.setFollowerID(follower_id);
-				sms.setFollowerInvert(follower_invert);
-			}
-			else
-			{
-				smc.resetFollower();
+				if (convertRevExternalFollower(follower_type, rev_follower_type) &&
+						safeSparkMaxCall(spark_max->Follow(rev_follower_type, follower_id, follower_invert), "Follow"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " follow");
+					sms.setFollowerType(follower_type);
+					sms.setFollowerID(follower_id);
+					sms.setFollowerInvert(follower_invert);
+				}
+				else
+				{
+					smc.resetFollower();
+				}
 			}
 
 			bool forward_softlimit_enable;
 			double forward_softlimit;
-			if (smc.changedForwardSoftlimit(forward_softlimit_enable, forward_softlimit) &&
-				safeSparkMaxCall(spark_max->SetSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, forward_softlimit), " SetSoftLimit(kForward)") &&
-				safeSparkMaxCall(spark_max->EnableSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, forward_softlimit_enable), " EnableSoftLimit(kForward)"))
+			if (smc.changedForwardSoftlimit(forward_softlimit_enable, forward_softlimit))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " forward softlimit");
-				sms.setForwardSoftlimitEnable(forward_softlimit_enable);
-				sms.setForwardSoftlimit(forward_softlimit);
-			}
-			else
-			{
-				smc.resetForwardSoftlimit();
+				if (safeSparkMaxCall(spark_max->SetSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, forward_softlimit), " SetSoftLimit(kForward)") &&
+						safeSparkMaxCall(spark_max->EnableSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, forward_softlimit_enable), " EnableSoftLimit(kForward)"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " forward softlimit");
+					sms.setForwardSoftlimitEnable(forward_softlimit_enable);
+					sms.setForwardSoftlimit(forward_softlimit);
+				}
+				else
+				{
+					smc.resetForwardSoftlimit();
+				}
 			}
 
 			bool reverse_softlimit_enable;
 			double reverse_softlimit;
-			if (smc.changedReverseSoftlimit(reverse_softlimit_enable, reverse_softlimit) &&
-				safeSparkMaxCall(spark_max->SetSoftLimit(rev::CANSparkMax::SoftLimitDirection::kReverse, reverse_softlimit), " SetSoftLimit(kReverse)") &&
-				safeSparkMaxCall(spark_max->EnableSoftLimit(rev::CANSparkMax::SoftLimitDirection::kReverse, reverse_softlimit_enable), " EnableSoftLimit(kReverse)"))
+			if (smc.changedReverseSoftlimit(reverse_softlimit_enable, reverse_softlimit))
 			{
-				ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " reverse softlimit");
-				sms.setReverseSoftlimitEnable(reverse_softlimit_enable);
-				sms.setReverseSoftlimit(reverse_softlimit);
-			}
-			else
-			{
-				smc.resetReverseSoftlimit();
+				if (safeSparkMaxCall(spark_max->SetSoftLimit(rev::CANSparkMax::SoftLimitDirection::kReverse, reverse_softlimit), " SetSoftLimit(kReverse)") &&
+					safeSparkMaxCall(spark_max->EnableSoftLimit(rev::CANSparkMax::SoftLimitDirection::kReverse, reverse_softlimit_enable), " EnableSoftLimit(kReverse)"))
+				{
+					ROS_INFO_STREAM("Updated Spark Max" << joint_id << "=" << spark_max_names_[joint_id] << " reverse softlimit");
+					sms.setReverseSoftlimitEnable(reverse_softlimit_enable);
+					sms.setReverseSoftlimit(reverse_softlimit);
+				}
+				else
+				{
+					smc.resetReverseSoftlimit();
+				}
 			}
 
 			double set_point;
@@ -3055,10 +3081,6 @@ void FRCRobotHWInterface::write(ros::Duration &elapsed_time)
 			{
 				spark_max->Set(set_point);
 				sms.setSetPoint(set_point);
-			}
-			else
-			{
-				smc.resetSetPoint();
 			}
 		}
 	}
