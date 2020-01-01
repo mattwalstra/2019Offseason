@@ -126,7 +126,7 @@ cargo_intake_controller:
     cargo_intake_follower:
         joint: cargo_intake_joint_follower
         type: talon_controllers/TalonFollowerController
-        invert_output: false
+        invert_output: False
         follow_joint: cargo_intake_joint
 
 
