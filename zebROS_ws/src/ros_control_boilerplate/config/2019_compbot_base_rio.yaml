@@ -25,7 +25,13 @@ hardware_interface:
        # Solenoids which are updated from controllers on the Jetson need
        # to be configured here so they can write to hardware attached
        # to the Rio
-       - {name: cargo_intake_arm_joint, type: solenoid, pcm: 0, id: 0, local_hardware: true, local_update: false}
+
+       #uncomment 1 below and remove 3 below that for normal robot.
+#       - {name: cargo_intake_arm_joint, type: solenoid, pcm: 0, id: 0, local_hardware: true, local_update: false}
+       - {name: cargo_intake_arm_joint, type: solenoid, pcm: 0, id: 0, local: true}
+       - {name: cargo_intake_joint, type: can_talon_srx, can_id: 0, local: true} 
+       - {name: cargo_intake_joint_follower, type: can_talon_srx, can_id: 1, local: true}
+
        - {name: climber_ski_joint, type: solenoid, pcm: 0, id: 3, local_hardware: true, local_update: false}
 
        - {name: climber_feet_retract, type: double_solenoid, pcm: 0, forward_id: 4, reverse_id: 5, local_hardware: true, local_update: false}
@@ -106,4 +112,21 @@ navx_offset_controller:
 robot_controller_state_controller:
    type: robot_controller_state_controller/RobotControllerStateController
    publish_rate: 100
+
+#remove below for normal robot
+cargo_intake_controller:
+    type:   cargo_intake_controller/CargoIntakeController
+    
+    cargo_intake_joint: "cargo_intake"
+    cargo_intake:
+        joint: cargo_intake_joint
+        type: talon_controllers/TalonPercentOutputController
+        invert_output: True 
+    cargo_intake_joint_follower: "cargo_intake_follower"
+    cargo_intake_follower:
+        joint: cargo_intake_joint_follower
+        type: talon_controllers/TalonFollowerController
+        invert_output: false
+        follow_joint: cargo_intake_joint
+
 
