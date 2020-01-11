@@ -1,0 +1,19 @@
+Header Header
+
+string[] name
+float64[] set_point
+float64[] position
+float64[] bus_voltage
+float64[] applied_output
+float64[] output_current
+float64[] motor_temperature
+float64[] velocity
+float64[] pidf_reference_value
+string[] pidf_reference_ctrl
+float64[] pidf_arb_feed_forward
+bool[] forward_limit_switch
+bool[] reverse_limit_switch
+bool[] forward_softlimit
+bool[] reverse_softlimit
+string[] faults
+string[] sticky_faults

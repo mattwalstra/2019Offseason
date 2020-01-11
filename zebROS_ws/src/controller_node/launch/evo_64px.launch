@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="turret" default="false" />
+  <!-- Create namesapce to avoid naming collisions if launching several drivers -->
+  <group ns="evo_64px_1">
+  
+    <node pkg="teraranger" type="evo_64px.py" name="evo_64px_parser" output="screen" >
+      <!-- Set the serial port name -->
+      <param name="portname" value="/dev/ttyACM0" />
+    </node>
+    <node name="plane_detection_node" pkg = "plane_detection" type="plane_detection_node" output="screen" >
+      <param name="turret" value= "$(arg turret)" />
+  </group>
+</launch>
