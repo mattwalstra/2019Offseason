@@ -1,3 +1,4 @@
+
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableInstance.h>
@@ -8,6 +9,7 @@
 #include <string>
 
 #include "sensor_msgs/PointCloud2.h"
+#include <pcl/point_types.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
