@@ -8,13 +8,15 @@ project(plane_detection)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
+    pcl_conversions
+    pcl_ros
     roscpp
     sensor_msgs
     )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED COMPONENTS common segmentation visualization)
+#find_package(PCL REQUIRED COMPONENTS common segmentation visualization)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
