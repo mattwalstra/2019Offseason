@@ -68,7 +68,7 @@ class plane_detection
 
         //Create Segmentation object and segment
         
-        seg.segment(*inliers, coefficients);
+        seg.segment(inliers, coefficients);
 
         if (inliers->indicies.size() == 0)
         {
@@ -78,7 +78,7 @@ class plane_detection
     
         //Calculate centroid for average distance of center 4 readings if in plane
         Eigen::Vector4f centroid;
-        pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
+        pcl::compute3DCentroid(cloud_filtered, inliers, centroid);
         //calculate angle from centroid point and origin- check part of centroid
     
         //write to network tables
