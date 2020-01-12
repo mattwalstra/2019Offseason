@@ -51,26 +51,26 @@ class plane_detection
 
         //convert pcl2 --> pcl<XYZ>
         pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(*cloud, pcl_pc2);
+        pcl_conversions::toPCL(cloud, pcl_pc2);
         
         pcl::fromPCLPointCloud2 (pcl_pc2, *cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
         if(true){
-            pass.setInputCloud(cloud_initial);
+            pass.setInputCloud(*cloud_initial);
             pass.setFilterFieldName("z");
             pass.setFilterLimits(0.0, 3.0);
             pass.filter(*cloud_filtered);
-            seg.setInputCloud(cloud_filtered);   
+            seg.setInputCloud(*cloud_filtered);   
         }else 
         {
-            seg.setInputCloud(cloud_initial);
+            seg.setInputCloud(*cloud_initial);
         }
 
         //Create Segmentation object and segment
         
-        seg.segment(inliers, coefficients);
+        seg.segment(*inliers, coefficients);
 
-        if (inliers->indicies.size() == 0)
+        if (*inliers->indicies.size() == 0)
         {
             ROS_WARN("Could not estimate a planar model for the given dataset.");
 
@@ -78,7 +78,7 @@ class plane_detection
     
         //Calculate centroid for average distance of center 4 readings if in plane
         Eigen::Vector4f centroid;
-        pcl::compute3DCentroid(cloud_filtered, inliers, centroid);
+        pcl::compute3DCentroid(*cloud_filtered, *inliers, centroid);
         //calculate angle from centroid point and origin- check part of centroid
     
         //write to network tables
