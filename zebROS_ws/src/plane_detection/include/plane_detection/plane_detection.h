@@ -70,7 +70,7 @@ class plane_detection
         
         seg.segment(*inliers, coefficients);
 
-        if (*inliers->indices.size() == 0)
+        if (inliers->indices.size() == 0)
         {
             ROS_WARN("Could not estimate a planar model for the given dataset.");
 
