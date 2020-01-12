@@ -1,13 +1,13 @@
 #include "plane_detection/plane_detection.h"
 
-using namespace plane_detection;
+using namespace plane_detection_node;
 
 plane_detection::plane_detection()
 {
     init()
 }
 
-~plane_detection::plane_detection(){}
+plane_detection::~plane_detection(){}
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "plane_detection");

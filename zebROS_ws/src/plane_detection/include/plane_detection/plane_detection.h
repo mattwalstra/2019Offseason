@@ -23,7 +23,7 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 
-namespace plane_detection{
+namespace plane_detection_node{
 class plane_detection
 {
     public:
