@@ -28,7 +28,7 @@ class plane_detection
 {
     public:
     pcl::ModelCoefficients coefficients;
-    pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+    pcl::PointIndices::Ptr inlier (new pcl::PointIndices ());
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -44,13 +44,13 @@ class plane_detection
     plane_detection();
     ~plane_detection();
 
-    void callback(const sensor_msgs::PointCloud2ConstPtr& cloud){
+    void callback(const sensor_msgs::PointCloud2& cloud){
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
 
         //convert pcl2 --> pcl<XYZ>
         pcl::PCLPointCloud2 pcl_pc2;
-        pcl::pcl_conversions::toPCL(*cloud, pcl_pc2);
+        pcl_conversions::toPCL(*cloud, pcl_pc2);
         
         pcl::fromPCLPointCloud2 (pcl_pc2, *cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
@@ -67,9 +67,9 @@ class plane_detection
 
         //Create Segmentation object and segment
         
-        seg.segment(*inliers, coefficients);
+        seg.segment(*inlier, coefficients);
 
-        if (inliers->indicies.size() == 0)
+        if (inlier->indicies.size() == 0)
         {
             ROS_WARN("Could not estimate a planar model for the given dataset.");
 
@@ -77,7 +77,7 @@ class plane_detection
     
         //Calculate centroid for average distance of center 4 readings if in plane
         Eigen::Vector4f centroid;
-        pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
+        pcl::compute3DCentroid(cloud_filtered, *inlier, centroid);
         //calculate angle from centroid point and origin- check part of centroid
     
         //write to network tables
