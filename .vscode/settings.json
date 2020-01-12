@@ -1,3 +1,13 @@
 {
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "*.inc": "cpp",
+        "array": "cpp",
+        "bitset": "cpp",
+        "slist": "cpp",
+        "initializer_list": "cpp",
+        "valarray": "cpp",
+        "string_view": "cpp",
+        "utility": "cpp"
+    }
 }

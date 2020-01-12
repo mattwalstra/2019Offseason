@@ -28,7 +28,7 @@ class plane_detection
 {
     public:
     pcl::ModelCoefficients coefficients;
-    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies ());
+    pcl::PointIndicies inliers;
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -50,7 +50,7 @@ class plane_detection
 
         //convert pcl2 --> pcl<XYZ>
         pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(*cloud, pcl_pc2);
+        pcl::pcl_conversions::toPCL(*cloud, pcl_pc2);
         
         pcl::fromPCLPointCloud2 (pcl_pc2, *cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
@@ -67,7 +67,7 @@ class plane_detection
 
         //Create Segmentation object and segment
         
-        seg.segment(*inliers, coefficients);
+        seg.segment(inliers, coefficients);
 
         if (inliers->indicies.size() == 0)
         {
