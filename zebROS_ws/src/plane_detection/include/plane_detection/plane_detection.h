@@ -45,8 +45,8 @@ class plane_detection
     ~plane_detection();
 
     void callback(const sensor_msgs::PointCloud2ConstPtr& cloud){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>;
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
 
         //convert pcl2 --> pcl<XYZ>
         pcl::PCLPointCloud2 pcl_pc2;
@@ -89,7 +89,7 @@ class plane_detection
 
     void init()
     {
-        inst = NetworkTableInstance::GetInstance();
+        inst = nt::NetworkTableInstance::GetDefault();
         Table = inst.GetTable("Evo_64px_1");
 
         xEntry = Table->GetEntry("x");

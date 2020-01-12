@@ -4,7 +4,7 @@ using namespace plane_detection_node;
 
 plane_detection::plane_detection()
 {
-    init()
+    init();
 }
 
 plane_detection::~plane_detection(){}
