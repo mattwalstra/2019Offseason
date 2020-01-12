@@ -26,14 +26,14 @@ namespace plane_detection{
 class plane_detection
 {
     public:
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies);
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients());
+    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies());
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
 
     nt::NetworkTableInstance inst;
-    NetworkTable Table;
+    std::shared_ptr<NetworkTable> Table;
 
     nt::NetworkTableEntry xEntry;
     nt::NetworkTableEntry yEntry;
@@ -44,8 +44,8 @@ class plane_detection
     ~plane_detection();
 
     void callback(const sensor_msgs::PointCloud2ConstPtr& cloud){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>());
 
         //convert pcl2 --> pcl<XYZ>
         pcl::fromPCLPointCloud2 (*cloud, cloud_initial);
@@ -81,20 +81,20 @@ class plane_detection
 
     void init()
     {
-        nt::NetworkTableInstance inst = NetworkTableInstance.GetInstance();
-        NetworkTable Table = inst.GetTable("Evo_64px_1");
+        inst = NetworkTableInstance.GetInstance();
+        Table = inst.GetTable("Evo_64px_1");
 
-        nt::NetworkTableEntry xEntry = Table.GetEntry("x");
-        nt::NetworkTableEntry yEntry = Table.GetEntry("y");
-        nt::NetworkTableEntry zEntry = Table.GetEntry("z");
-        nt::NetworkTableEntry tEntry = Table.GetEntry("t");
+        xEntry = Table.GetEntry("x");
+        yEntry = Table.GetEntry("y");
+        zEntry = Table.GetEntry("z");
+        tEntry = Table.GetEntry("t");
         inst.StartClientTeam(7054);
 
         //optional
         seg.setOptimizeCoefficients(true);
         //Mandatory
         seg.setModelType(pcl::SACMODEL_PLANE);
-        seg.setMethodType(pcl::SAC_RANSAC)
+        seg.setMethodType(pcl::SAC_RANSAC);
         seg.setDistanceThreshold(.01);
     }
     
