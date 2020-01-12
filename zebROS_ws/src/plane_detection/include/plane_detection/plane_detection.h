@@ -27,8 +27,8 @@ namespace plane_detection_node{
 class plane_detection
 {
     public:
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies);
+    pcl::ModelCoefficients coefficients;
+    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies ());
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -67,7 +67,7 @@ class plane_detection
 
         //Create Segmentation object and segment
         
-        seg.segment(*inliers, *coefficients);
+        seg.segment(*inliers, coefficients);
 
         if (inliers->indicies.size() == 0)
         {
