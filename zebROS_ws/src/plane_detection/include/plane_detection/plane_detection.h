@@ -20,6 +20,7 @@
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
 #include <pcl/point_types.h>
+#include <pcl/point_indicies.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 
@@ -28,7 +29,7 @@ class plane_detection
 {
     public:
     pcl::ModelCoefficients coefficients;
-    pcl::PointIndices::Ptr inlier (new pcl::PointIndices ());
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -67,9 +68,9 @@ class plane_detection
 
         //Create Segmentation object and segment
         
-        seg.segment(*inlier, coefficients);
+        seg.segment(*inliers, coefficients);
 
-        if (inlier->indicies.size() == 0)
+        if (inliers->indicies.size() == 0)
         {
             ROS_WARN("Could not estimate a planar model for the given dataset.");
 
@@ -77,7 +78,7 @@ class plane_detection
     
         //Calculate centroid for average distance of center 4 readings if in plane
         Eigen::Vector4f centroid;
-        pcl::compute3DCentroid(cloud_filtered, *inlier, centroid);
+        pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
         //calculate angle from centroid point and origin- check part of centroid
     
         //write to network tables
