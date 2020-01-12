@@ -20,7 +20,7 @@
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
 #include <pcl/point_types.h>
-#include <pcl/point_indicies.h>
+#include <pcl/PointIndicies.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 
