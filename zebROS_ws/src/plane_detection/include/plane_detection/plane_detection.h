@@ -46,8 +46,8 @@ class plane_detection
     ~plane_detection();
 
     void callback(const sensor_msgs::PointCloud2& cloud){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered{ new pcl::PointCloud<pcl::PointXYZ>};
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial{ new pcl::PointCloud<pcl::PointXYZ>};
 
         //convert pcl2 --> pcl<XYZ>
         pcl::PCLPointCloud2 pcl_pc2;
