@@ -1,6 +1,7 @@
 #include "plane_detection/plane_detection.h"
 
-using namespace plane_detection{
+using namespace plane_detection;
+
 plane_detection::plane_detection()
 {
     init()
@@ -19,4 +20,3 @@ int main(int argc, char** argv){
     ros::spin();
 }
 
-}

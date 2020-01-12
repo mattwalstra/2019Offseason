@@ -18,6 +18,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/conversions.h>
 #include <pcl/common/common.h>
+#include <pcl/common/centroid.h>
 #include <pcl/point_types.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
@@ -26,8 +27,8 @@ namespace plane_detection{
 class plane_detection
 {
     public:
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients());
-    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies());
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndicies::Ptr inliers (new pcl::PointIndicies);
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -44,21 +45,28 @@ class plane_detection
     ~plane_detection();
 
     void callback(const sensor_msgs::PointCloud2ConstPtr& cloud){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>());
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>;
 
         //convert pcl2 --> pcl<XYZ>
-        pcl::fromPCLPointCloud2 (*cloud, cloud_initial);
+        pcl::PCLPointCloud2 pcl_pc2;
+        pcl_conversions::toPCL(*cloud, pcl_pc2);
+        
+        pcl::fromPCLPointCloud2 (pcl_pc2, *cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
         if(true){
             pass.setInputCloud(cloud_initial);
             pass.setFilterFieldName("z");
             pass.setFilterLimits(0.0, 3.0);
-            pass.filter(*cloud_filtered);   
+            pass.filter(*cloud_filtered);
+            seg.setInputCloud(cloud_filtered);   
+        }else 
+        {
+            seg.setInputCloud(cloud_initial);
         }
 
         //Create Segmentation object and segment
-        seg.setInputCloud(cloud_filtered);
+        
         seg.segment(*inliers, *coefficients);
 
         if (inliers->indicies.size() == 0)
@@ -81,13 +89,13 @@ class plane_detection
 
     void init()
     {
-        inst = NetworkTableInstance.GetInstance();
+        inst = NetworkTableInstance::GetInstance();
         Table = inst.GetTable("Evo_64px_1");
 
-        xEntry = Table.GetEntry("x");
-        yEntry = Table.GetEntry("y");
-        zEntry = Table.GetEntry("z");
-        tEntry = Table.GetEntry("t");
+        xEntry = Table->GetEntry("x");
+        yEntry = Table->GetEntry("y");
+        zEntry = Table->GetEntry("z");
+        tEntry = Table->GetEntry("t");
         inst.StartClientTeam(7054);
 
         //optional
