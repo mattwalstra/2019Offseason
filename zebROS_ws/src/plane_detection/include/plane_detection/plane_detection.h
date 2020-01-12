@@ -16,7 +16,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
-#include <pcl/conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/common/common.h>
 #include <pcl/common/centroid.h>
 #include <pcl/point_types.h>
@@ -46,25 +46,29 @@ class plane_detection
     ~plane_detection();
 
     void callback(const sensor_msgs::PointCloud2& cloud){
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered{ new pcl::PointCloud<pcl::PointXYZ>};
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial{ new pcl::PointCloud<pcl::PointXYZ>};
+        pcl::PointCloud<pcl::PointXYZ> cloud_filtered;
+        pcl::PointCloud<pcl::PointXYZ> cloud_initial;
+
+        //pcl::PointCloud<pcl::PointXYZ> cloud_filtered{new pcl::PointCloud<pcl::PointXYZ>};
+        //pcl::PointCloud<pcl::PointXYZ> cloud_initial{new pcl::PointCloud<pcl::PointXYZ>};
 
         //convert pcl2 --> pcl<XYZ>
-        pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(cloud, pcl_pc2);
+        pcl::fromROSMsg(cloud, cloud_initial);
+        const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_initial_const {new pcl::PointCloud<pcl::PointXYZ>(cloud_initial)};
         
-        pcl::fromPCLPointCloud2 (pcl_pc2, *cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
-        if(true){
-            pass.setInputCloud(cloud_initial);
+        //if(true){
+            pass.setInputCloud(cloud_initial_const);
             pass.setFilterFieldName("z");
             pass.setFilterLimits(0.0, 3.0);
-            pass.filter(*cloud_filtered);
-            seg.setInputCloud(cloud_filtered);   
-        }else 
-        {
-            seg.setInputCloud(*cloud_initial);
-        }
+            pass.filter(cloud_filtered);
+
+            const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_filtered_const { new pcl::PointCloud<pcl::PointXYZ>(cloud_filtered)};
+            seg.setInputCloud(cloud_filtered_const);   
+        //}else 
+        //{
+        //    seg.setInputCloud(cloud_initial);
+        //}
 
         //Create Segmentation object and segment
         
