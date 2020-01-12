@@ -19,6 +19,8 @@
 #include <pcl/conversions.h>
 #include <pcl/common/common.h>
 #include <pcl/point_types.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/io/pcd_io.h>
 
 namespace plane_detection{
 class plane_detection
@@ -43,7 +45,7 @@ class plane_detection
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
 
         //convert pcl2 --> pcl<XYZ>
-        pcl::fromPCLPointCloud2 (*cloud, *cloud_initial);
+        pcl::fromPCLPointCloud2 (cloud, cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
         if(true){
             pass.setInputCloud(cloud_initial);
