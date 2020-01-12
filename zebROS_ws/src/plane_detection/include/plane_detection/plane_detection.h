@@ -29,7 +29,7 @@ class plane_detection
 {
     public:
     pcl::ModelCoefficients coefficients;
-    pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+    pcl::PointIndices::Ptr inliers {new pcl::PointIndices ()};
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     pcl::PassThrough<pcl::PointXYZ> pass;
