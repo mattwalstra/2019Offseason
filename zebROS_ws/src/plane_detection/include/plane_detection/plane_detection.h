@@ -40,12 +40,15 @@ class plane_detection
     nt::NetworkTableEntry zEntry;
     nt::NetworkTableEntry tEntry;
     
+    plane_detection();
+    ~plane_detection();
+
     void callback(const sensor_msgs::PointCloud2ConstPtr& cloud){
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered( new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_initial( new pcl::PointCloud<pcl::PointXYZ>);
 
         //convert pcl2 --> pcl<XYZ>
-        pcl::fromPCLPointCloud2 (cloud, cloud_initial);
+        pcl::fromPCLPointCloud2 (*cloud, cloud_initial);
         //filter out bottom 1/2 add paramter in launch to set true or not
         if(true){
             pass.setInputCloud(cloud_initial);
@@ -94,9 +97,6 @@ class plane_detection
         seg.setMethodType(pcl::SAC_RANSAC)
         seg.setDistanceThreshold(.01);
     }
-    plane_detection(){
-        init();
-    }
-    ~plane_detection(){}
+    
 };
 }
