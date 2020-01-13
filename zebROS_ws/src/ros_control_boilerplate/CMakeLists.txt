@@ -386,7 +386,7 @@ if (NOT (("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "arm-linux-gnueabihf") OR
 		  "${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "aarch64-linux-gnu"))  
 	set (CTRE_USER_LIBS 
 		${CTRE_USER_LIBS}
-		${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
+		#${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
 	)
 endif()
 

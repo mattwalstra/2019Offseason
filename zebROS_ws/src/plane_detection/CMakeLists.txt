@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(plane_detection)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
- add_compile_options(-std=c++17)
+ #add_compile_options(-std=c++17)
+ include ("../cmake_modules/CMakeOpt.cmake")
+ set(CMAKE_CXX_STANDARD 17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -116,32 +118,25 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
- include
- ${catkin_INCLUDE_DIRS}
-)
 
 set (WPI_SYSROOT $ENV{HOME}/wpilib/2020/roborio/arm-frc2020-linux-gnueabi)
-include_directories(
-	${catkin_INCLUDE_DIRS}
-	${WPI_SYSROOT}/include/wpilib
-	${WPI_SYSROOT}/include
-	${WPI_SYSROOT}/include/navx
-)
-
 # Base regardless of OS type
 set (WPI_BASE_LIB_DIR ${WPI_SYSROOT}/lib/wpilib/linux)
 
 set (ALLWPILIB ../../../allwpilib)
 # Used to find HALInitializer from wpilib internal repo
-include_directories(${ALLWPILIB}/hal/src/main/native/athena)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+	${WPI_SYSROOT}/include/wpilib
+	${WPI_SYSROOT}/include
+  ${ALLWPILIB}/hal/src/main/native/athena)
 
 file(GLOB
 		ntcore_native_src ${ALLWPILIB}/ntcore/src/main/native/cpp/*.cpp
 		ntcore_native_src ${ALLWPILIB}/ntcore/src/main/native/cpp/networktables/*.cpp
 		ntcore_native_src ${ALLWPILIB}/ntcore/src/main/native/cpp/tables/*.cpp
-	)
-
+  )
+  
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/plane_detection.cpp
@@ -155,7 +150,33 @@ file(GLOB
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(${PROJECT_NAME}_node src/plane_detection.cpp)
+ add_executable(${PROJECT_NAME}_node 
+      src/plane_detection.cpp
+      ${ntcore_native_src}
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/leb128.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/raw_istream.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/raw_socket_istream.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/raw_socket_ostream.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/timestamp.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/Base64.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/SafeThread.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/SocketError.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/TCPAcceptor.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/TCPConnector.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/TCPConnector_parallel.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/TCPStream.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/raw_ostream.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/Error.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/ErrorHandling.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/Hashing.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/ManagedStatic.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/NativeFormatting.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/Path.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/SmallPtrSet.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/SmallVector.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/StringMap.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/StringRef.cpp
+	${ALLWPILIB}/wpiutil/src/main/native/cpp/llvm/Twine.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

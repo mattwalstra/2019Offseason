@@ -45,71 +45,10 @@ class plane_detection
     plane_detection();
     ~plane_detection();
 
-    void callback(const sensor_msgs::PointCloud2& cloud){
-        pcl::PointCloud<pcl::PointXYZ> cloud_filtered;
-        pcl::PointCloud<pcl::PointXYZ> cloud_initial;
+    void callback(const sensor_msgs::PointCloud2& cloud);
 
-        //pcl::PointCloud<pcl::PointXYZ> cloud_filtered{new pcl::PointCloud<pcl::PointXYZ>};
-        //pcl::PointCloud<pcl::PointXYZ> cloud_initial{new pcl::PointCloud<pcl::PointXYZ>};
-
-        //convert pcl2 --> pcl<XYZ>
-        pcl::fromROSMsg(cloud, cloud_initial);
-        const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_initial_const {new pcl::PointCloud<pcl::PointXYZ>(cloud_initial)};
-        
-        //filter out bottom 1/2 add paramter in launch to set true or not
-        //if(true){
-            pass.setInputCloud(cloud_initial_const);
-            pass.setFilterFieldName("z");
-            pass.setFilterLimits(0.0, 3.0);
-            pass.filter(cloud_filtered);
-
-            const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_filtered_const { new pcl::PointCloud<pcl::PointXYZ>(cloud_filtered)};
-            seg.setInputCloud(cloud_filtered_const);   
-        //}else 
-        //{
-        //    seg.setInputCloud(cloud_initial);
-        //}
-
-        //Create Segmentation object and segment
-        
-        seg.segment(*inliers, coefficients);
-
-        if (inliers->indices.size() == 0)
-        {
-            ROS_WARN("Could not estimate a planar model for the given dataset.");
-
-        }
+    void init();
     
-        //Calculate centroid for average distance of center 4 readings if in plane
-        Eigen::Vector4f centroid;
-        pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
-        //calculate angle from centroid point and origin- check part of centroid
-    
-        //write to network tables
-        xEntry.SetDouble(centroid(0));
-        yEntry.SetDouble(centroid(1));
-        zEntry.SetDouble(centroid(2));
-        tEntry.SetDouble(centroid(3));
-    }
-
-    void init()
-    {
-        inst = nt::NetworkTableInstance::GetDefault();
-        Table = inst.GetTable("Evo_64px_1");
-
-        xEntry = Table->GetEntry("x");
-        yEntry = Table->GetEntry("y");
-        zEntry = Table->GetEntry("z");
-        tEntry = Table->GetEntry("t");
-        inst.StartClientTeam(7054);
-
-        //optional
-        seg.setOptimizeCoefficients(true);
-        //Mandatory
-        seg.setModelType(pcl::SACMODEL_PLANE);
-        seg.setMethodType(pcl::SAC_RANSAC);
-        seg.setDistanceThreshold(.01);
-    }
     
 };
 }
