@@ -125,6 +125,7 @@ include_directories(
 	${WPI_SYSROOT}/include/wpilib
 	${WPI_SYSROOT}/include
 	${WPI_SYSROOT}/include/navx
+	${WPI_SYSROOT}/include/rev
 )
 
 # Base regardless of OS type
@@ -133,6 +134,7 @@ set (WPI_BASE_LIB_DIR ${WPI_SYSROOT}/lib/wpilib/linux)
 # Rio-only code
 if ("${ARM_PREFIX}" STREQUAL "arm-frc2020-linux-gnueabi")
 	set (CTRE_LIB_DIR ${WPI_SYSROOT}/lib/ctre/linux/athena/static)
+	set (SPARK_MAX_LIB_DIR ${WPI_SYSROOT}/lib/rev/linux/athena/static)
 
 	# Link against wpi user libraries for CAN talon and navX-MXP code and
 	# wpilib for HAL, driver station, and so on
@@ -159,10 +161,13 @@ if ("${ARM_PREFIX}" STREQUAL "arm-frc2020-linux-gnueabi")
 	)
 elseif ("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "arm-linux-gnueabihf") # Jetson TK1
 	set (CTRE_LIB_DIR ${WPI_SYSROOT}/lib/ctre/linux/raspbian/static)    # Who knows if this will work
+	set (SPARK_MAX_LIB_DIR ${WPI_SYSROOT}/lib/rev/linux/raspbian/static)
 elseif ("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "aarch64-linux-gnu") # Jetson TX1/TX2
 	set (CTRE_LIB_DIR ${WPI_SYSROOT}/lib/ctre/linux/jetsontx/static)
+	set (SPARK_MAX_LIB_DIR ${WPI_SYSROOT}/lib/rev/linux/aarch64bionic/static)
 else() # x86-64, hopefully. First person to try and build native on a Mac gets kicked off the team
 	set (CTRE_LIB_DIR ${WPI_SYSROOT}/lib/ctre/linux/x86-64/static)
+	set (SPAKR_MAX_LIB_DIR ${WPI_SYSROOT}/lib/rev/linux/x86_64/static)
 endif()
   
 # All platforms need these, they just live
@@ -170,6 +175,11 @@ endif()
 set (CTRE_USER_LIBS
 	${CTRE_LIB_DIR}/libCTRE_Phoenix.a
 	${CTRE_LIB_DIR}/libCTRE_PhoenixCCI.a
+)
+
+set (SPARK_MAX_USER_LIBS
+	${SPARK_MAX_LIB_DIR}/libSparkMax.a
+	${SPARK_MAX_LIB_DIR}/libSparkMaxDriver.a
 )
 
 set (ALLWPILIB ../../../allwpilib)
@@ -296,7 +306,7 @@ if (NOT "${ARM_PREFIX}" STREQUAL "arm-frc2020-linux-gnueabi")
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/livewindow/LiveWindow.cpp
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/ListenerExecutor.cpp
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/SendableBase.cpp
-			${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/SendableBuilderImpl.cpp
+			#${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/SendableBuilderImpl.cpp
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/SendableRegistry.cpp
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/smartdashboard/SmartDashboard.cpp
 			${ALLWPILIB}/wpilibc/src/main/native/cpp/shuffleboard/ComplexWidget.cpp
@@ -350,7 +360,7 @@ if (NOT "${ARM_PREFIX}" STREQUAL "arm-frc2020-linux-gnueabi")
 				  "${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "aarch64-linux-gnu"))  
 			set (CTRE_DIAGNOSTIC_LIBS 
 				${CTRE_DIAGNOSTIC_LIBS}
-				${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
+				#${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
 			)
 		endif()
 		target_link_libraries(frcrobot_phoenixsim_main
@@ -398,6 +408,7 @@ target_link_libraries(frcrobot_hw_main
 	${catkin_LIBRARIES}
 	${PLATFORM_SPECIFIC_LIBS}
 	${CTRE_USER_LIBS}
+	${SPARK_MAX_USER_LIBS}
 	frc_robot_interface
 )
 
@@ -415,6 +426,7 @@ target_link_libraries(q_to_rpy
 	${catkin_LIBRARIES}
 	${PLATFORM_SPECIFIC_LIBS}
 	${CTRE_USER_LIBS}
+	
 )
 
 add_dependencies(q_to_rpy
