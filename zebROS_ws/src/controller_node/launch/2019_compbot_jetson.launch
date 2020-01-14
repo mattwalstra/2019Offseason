@@ -19,6 +19,10 @@
 		<rosparam file="$(find ros_control_boilerplate)/config/robot_code_ready_controller_jetson.yaml" command="load"/>
 		
 		<include file="$(find controller_node)/launch/evo_64px.launch" />
+		<include file="$(find controller_node)/launch/tape_detection.launch" />
+		<include file="$(find controller_node)/launch/pixy_line_detection.launch" />
+
+		<include file="$(find realsenese)/realsense2_camera/launch/rs_camera.launch" />
 		<!--
 		<rosparam file="$(find robot_visualizer)/config/robot_visualize.yaml" command="load"/>
 -->
