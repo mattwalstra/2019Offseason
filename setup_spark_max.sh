@@ -14,7 +14,7 @@ mkdir -p /home/ubuntu/wpilib/2020/roborio/arm-frc2020-linux-gnueabi/lib/rev
 #unzip -o /home/ubuntu/Downloads/maven/com/revrobotics/frc/SparkMax-driver/1.5.1/SparkMax-driver-1.5.1-linuxathenastatic.zip
 
 
-cd /home/ubuntu/wpilib/2020/roborio/arm-frc2020-linux-gnueabi/include 
+cd /home/ubuntu/wpilib/2020/roborio/arm-frc2020-linux-gnueabi/include/rev
 find /home/ubuntu/Downloads/maven/com/revrobotics/frc/SparkMax-driver/1.5.1/ -name \*headers\*zip | xargs -n 1 unzip -o
 find /home/ubuntu/Downloads/maven/com/revrobotics/frc/SparkMax-cpp/1.5.1/ -name \*headers\*zip | xargs -n 1 unzip -o 
 cd /home/ubuntu/wpilib/2020/roborio/arm-frc2020-linux-gnueabi/lib/rev 
