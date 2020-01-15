@@ -331,7 +331,7 @@ if (NOT "${ARM_PREFIX}" STREQUAL "arm-frc2020-linux-gnueabi")
 				  "${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "aarch64-linux-gnu"))  
 			set (CTRE_DIAGNOSTIC_LIBS 
 				${CTRE_DIAGNOSTIC_LIBS}
-				${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
+				#${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
 			)
 		endif()
 		target_link_libraries(frcrobot_phoenixsim_main
@@ -367,7 +367,7 @@ if (NOT (("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "arm-linux-gnueabihf") OR
 		  "${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "aarch64-linux-gnu"))  
 	set (CTRE_USER_LIBS 
 		${CTRE_USER_LIBS}
-		${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
+		#${CTRE_LIB_DIR}/libCTRE_PhoenixDiagnostics.a
 	)
 endif()
 
