@@ -137,7 +137,7 @@ int main(int argc, char** argv){
     ros::NodeHandle n;
 
     plane_detection *plane_example = new plane_detection();
-    ros::Subscriber sub = n.subscribe("evo_64px_1/teraranger_evo_64px/point_cloud", 1000, &plane_detection::callback, plane_example);
+    ros::Subscriber sub = n.subscribe("/evo_64px_1/teraranger_evo_64px/point_cloud", 1000, &plane_detection::callback, plane_example);
 
     ros::spin();
 }
