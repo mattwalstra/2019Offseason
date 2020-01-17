@@ -85,7 +85,7 @@ class plane_detection
     
     ROS_INFO("X: %f, Y: %f, Z: %f, T: %f", centroid(0), centroid(1), centroid(2), t);
     ROS_INFO("A: %f, B: %f, C: %f, D: %f", coefficients->values[0],coefficients->values[1],coefficients->values[2],coefficients->values[3]);
-    
+    ROS_INFO("Size: %f", inliers->indicies.size());
      
     //write to network tables
     xEntry.SetDouble(centroid(0));
