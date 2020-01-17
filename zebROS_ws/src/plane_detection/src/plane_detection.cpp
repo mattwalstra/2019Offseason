@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <string>
+#include <cmath>
 
 #include "sensor_msgs/PointCloud2.h"
 
@@ -26,7 +27,7 @@ namespace plane_detection_node{
 class plane_detection
 {
     public:
-    pcl::ModelCoefficients coefficients;
+    pcl::ModelCoefficients::Ptr coefficients{ new pcl::ModelCoefficients()};
     pcl::PointIndices::Ptr inliers {new pcl::PointIndices ()};
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -68,7 +69,7 @@ class plane_detection
 
     //Create Segmentation object and segment
         
-    seg.segment(*inliers, coefficients);
+    seg.segment(*inliers, *coefficients);
 
     if (inliers->indices.size() == 0)
     {
@@ -76,16 +77,21 @@ class plane_detection
 
     }
 
-    //Calculate centroid for average distance of center 4 readings if in plane
+    //Calculate centroid for average distance of plane
     Eigen::Vector4f centroid;
     pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
-    //calculate angle from centroid point and origin- check part of centroid
-    ROS_INFO("X: %f, Y: %f, Z: %f, T: %f", centroid(0), centroid(1), centroid(2), centroid(3));
+    //calculate angle from equation coefficients t=asin(A/B); Ax+By+Cz+D=0;
+    double t = std::asin(coefficients->values[1]/coefficients->values[0]);
+    
+    ROS_INFO("X: %f, Y: %f, Z: %f, T: %f", centroid(0), centroid(1), centroid(2), t);
+    ROS_INFO("A: %f, B: %f, C: %f, D: %f", coefficients->values[0],coefficients->values[1],coefficients->values[2],coefficients->values[3]);
+    
+     
     //write to network tables
     xEntry.SetDouble(centroid(0));
     yEntry.SetDouble(centroid(1));
     zEntry.SetDouble(centroid(2));
-    tEntry.SetDouble(centroid(3));
+    tEntry.SetDouble(t);
     }
 
     void init()
