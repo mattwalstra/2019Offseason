@@ -26,9 +26,12 @@ export CUDA_CACHE_MAXSIZE=104857600
 export CUDA_CACHE_PATH=/home/ubuntu/.nv/ComputeCache
 
 # TODO these should no longer be needed
-#cd /home/ubuntu/2019Offseason/build
-#python3 -m http.server 5805 &
+cd /home/ubuntu/2019Offseason/build
+python3 -m http.server 5805 &
 cd /home/ubuntu/2019Offseason/jetson_setup/
+
+source /opt/ros/melodic/setup.bash
+source /home/ubuntu/2019Offseason/zebROS_ws/devel/setup.bash
 
 if sudo mount /dev/nvme0n1p1 /mnt/900_2; then
 		date >> /home/ubuntu/mounted.txt

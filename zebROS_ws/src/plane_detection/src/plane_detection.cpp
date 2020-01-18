@@ -148,7 +148,7 @@ class plane_detection
     pcl::compute3DCentroid(cloud_initial, *inliers, centroid);
     //calculate angle from equation coefficients t=asin(A/B); Ax+By+Cz+D=0;
     double x = rollingAverageX(coefficients->values[2]);
-    double y = rollingAverageY(coefficients->values[0]);
+    double y = rollingAverageY(coefficients->values[1]);
     double t;
     if (x<kEpsilon && x>-kEpsilon)
     {
