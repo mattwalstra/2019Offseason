@@ -52,7 +52,8 @@ class plane_detection
         //convert pcl2 --> pcl<XYZ>
     pcl::fromROSMsg(cloud, cloud_initial);
     const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_initial_const {new pcl::PointCloud<pcl::PointXYZ>(cloud_initial)};
-        
+    if (false)
+    {    
         //filter out bottom 1/2 add paramter in launch to set true or not
         //if(true){
     pass.setInputCloud(cloud_initial_const);
@@ -62,6 +63,11 @@ class plane_detection
 
     const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_filtered_const { new pcl::PointCloud<pcl::PointXYZ>(cloud_filtered)};
     seg.setInputCloud(cloud_filtered_const);   
+    } else
+    {
+        seg.setInputCloud(cloud_initial_const);
+    }
+    
         //}else 
         //{
         //    seg.setInputCloud(cloud_initial);
@@ -111,7 +117,7 @@ class plane_detection
     tEntry.SetDouble(-1.0);
 
     //optional
-    seg.setOptimizeCoefficients(true);
+    //seg.setOptimizeCoefficients(true);
     //Mandatory
     seg.setModelType(pcl::SACMODEL_PLANE);
     seg.setMethodType(pcl::SAC_RANSAC);
