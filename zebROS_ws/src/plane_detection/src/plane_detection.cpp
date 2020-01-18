@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <cmath>
+#include <vector>
+#include <numeric>
 
 #include "sensor_msgs/PointCloud2.h"
 
@@ -40,7 +42,64 @@ class plane_detection
     nt::NetworkTableEntry yEntry;
     nt::NetworkTableEntry zEntry;
     nt::NetworkTableEntry tEntry;
-    
+
+    std::vector<float> xValues;
+    std::vector<float> yValues;
+    float prev_x;
+    float prev_y;
+    int countX = 0;
+    int countY = 0;
+
+    int signed n = 10;
+    double kEpsilon = 1E-2;
+    double threshold_change = .4
+
+
+    float rollingAverageX(float x)
+    {
+        if (countX==0)
+        {
+            prev_x=x;
+        }
+
+        if ((prev_x-x)<threshold_change)
+        {
+            xValues.push_back(x);
+
+            if (xValues.size()>n)
+            {
+                xValues.erase(xValues.begin());
+            }
+        }
+
+        float average = std::accumulate(xValues.begin(), xValues.end(), 0.0)/xValues.size();
+        countX++;
+        return average;
+    }
+
+    float rollingAverageY(float y)
+    {
+        if (countY==0)
+        {
+            prev_y=y;
+        }
+
+        if ((prev_y-y)<threshold_change)
+        {
+
+            yValues.push_back(y);
+
+            if (yValues.size()>n)
+            {
+                yValues.erase(yValues.begin());
+            }
+        }
+        countY++;
+        float average = std::accumulate(yValues.begin(), yValues.end(), 0.0)/yValues.size();
+
+        return average;
+    }    
+        
     void callback(const sensor_msgs::PointCloud2& cloud)
     {
     pcl::PointCloud<pcl::PointXYZ> cloud_filtered;
@@ -88,7 +147,17 @@ class plane_detection
     //pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
     pcl::compute3DCentroid(cloud_initial, *inliers, centroid);
     //calculate angle from equation coefficients t=asin(A/B); Ax+By+Cz+D=0;
-    double t = std::asin(coefficients->values[1]/coefficients->values[0]);
+    double x = rollingAverageX(coefficients->values[2]);
+    double y = rollingAverageY(coefficients->values[0]);
+    double t;
+    if (x<kEpsilon && x>-kEpsilon)
+    {
+        t = 0;
+    }else 
+    {
+        t = std::atan(y/x);
+    }
+
     
     ROS_INFO("X: %f, Y: %f, Z: %f, T: %f", centroid(0), centroid(1), centroid(2), t);
     ROS_INFO("A: %f, B: %f, C: %f, D: %f", coefficients->values[0],coefficients->values[1],coefficients->values[2],coefficients->values[3]);
