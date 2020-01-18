@@ -85,7 +85,8 @@ class plane_detection
 
     //Calculate centroid for average distance of plane
     Eigen::Vector4f centroid;
-    pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
+    //pcl::compute3DCentroid(cloud_filtered, *inliers, centroid);
+    pcl::compute3DCentroid(cloud_inital, *inliers, centroid);
     //calculate angle from equation coefficients t=asin(A/B); Ax+By+Cz+D=0;
     double t = std::asin(coefficients->values[1]/coefficients->values[0]);
     
