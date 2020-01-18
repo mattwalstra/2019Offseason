@@ -52,7 +52,7 @@ class plane_detection
 
     int signed n = 10;
     double kEpsilon = 1E-2;
-    double threshold_change = .4
+    double threshold_change = .4;
 
 
     float rollingAverageX(float x)
