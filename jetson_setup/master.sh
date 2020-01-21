@@ -10,7 +10,7 @@ sudo rfkill block bluetooth
 sysctl -w kernel.sched_rt_runtime_us=-1
 ulimit -r unlimited
 
-/home/ubuntu/2019Offseason/jetson_setup/can_up.sh
+#/home/ubuntu/2019Offseason/jetson_setup/can_up.sh
 
 . /home/ubuntu/2019Offseason/zebROS_ws/ROSJetsonMaster.sh
 #echo 1100-1200,443,80,554,1735 > /proc/sys/net/ipv4/ip_local_reserved_ports
@@ -19,7 +19,7 @@ ulimit -r unlimited
 #systemctl restart networking
 
 # TODO - this should be handled by 10-local.rules 
-#sudo chmod a+rw /dev/ttyACM0
+sudo chmod a+rw /dev/ttyACM0
 sudo umount /mnt/900_2 --lazy
 
 export CUDA_CACHE_MAXSIZE=104857600
@@ -50,4 +50,4 @@ top -b > /mnt/900_2/$(date +%Y%m%d%H%M%S)_top_log.txt
 # for retro-tape detection
 #v4l2-ctl -d `find /dev/v4l/by-id/ -name \*Webcam_C9\*` -c exposure_auto=1,exposure_absolute=20,brightness=5
 
-/home/ubuntu/2019Offseason/jetson_setup/clocks.sh &
+#/home/ubuntu/2019Offseason/jetson_setup/clocks.sh &
